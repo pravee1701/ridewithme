@@ -17,22 +17,4 @@ out/
 
 # OS files
 .DS_Store
-Thumbs.db
-
-# Editor directories and files
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-
-# Logs
-logs/
-*.log
-
-# Testing
-coverage/
-
-# Temporary files
-*.swp
-*.swo
-.tmp/
+dist/backend/.env
