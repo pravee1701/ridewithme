@@ -2,7 +2,6 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-
 const captainSchema = new Schema({
     fullname:{
         firstname:{
@@ -33,7 +32,7 @@ const captainSchema = new Schema({
     },
     status:{
         type: String,
-        enum: ['active, "inactive'],
+        enum: ["active", "inactive"],
         default: "inactive",
     },
     vehicles:{

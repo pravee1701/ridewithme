@@ -8,10 +8,10 @@ export const registerCaptain = async (req, res) => {
     try {
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            return res.status(400).json({error:error.array()})
+            return res.status(400).json({error:errors.array()})
         }
 
-        const {fullname, email, password, vehicle} = req.body;
+        const {fullname, email, password, vehicles} = req.body;
 
         const isCaptainAlreadyExists = await captainModel.findOne({email});
 
@@ -20,16 +20,15 @@ export const registerCaptain = async (req, res) => {
         }
 
         const hashedPassword  = await captainModel.hashPassword(password);
-
         const captain = await createCaptain({
             firstname: fullname.firstname,
             lastname: fullname.lastname,
             email,
             password: hashedPassword,
-            color: vehicle.color,
-            plate: vehicle.plate,
-            capacity: vehicle.capacity,
-            vehicleType: vehicle.vehicleType
+            color: vehicles.color,
+            plate: vehicles.plate,
+            capacity: vehicles.capacity,
+            vehicleType: vehicles.vehicleType
         })
 
         const token= captain.generateAuthToken();
@@ -46,27 +45,28 @@ export const loginCaptain = async (req, res)=>{
     try {
         const errors = validationResult(req);
         if(!errors.isEmpty()){
-            return res.status(400).json({errors:erros.array()})
+            return res.status(400).json({errors:errors.array()})
         }
 
         const {email, password} = req.body;
-        const captain = await captainModel.findOne({email});
+        const captain = await captainModel.findOne({email}).select("+password");
 
         if(!captain){
             return res.status(400).json({messge:"Invalid credentials"})
         }
 
         const isMatch = await captain.comparePassword(password);
-
         if(!isMatch){
             return res.status(400).json({messaage:"Invalid credentials"})
         }
 
         const token = captain.generateAuthToken();
 
-        res.cookie("token", captain);
+        res.cookie("token", token);
+
+        return res.status(200).json({captain, token});
     } catch (error) {
-        console.log(eror)
+        console.log(error)
         res.status(500).json({message: "Internal server error"})
     }
 }
