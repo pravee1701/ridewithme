@@ -52,12 +52,12 @@ export const loginCaptain = async (req, res)=>{
         const captain = await captainModel.findOne({email}).select("+password");
 
         if(!captain){
-            return res.status(400).json({messge:"Invalid credentials"})
+            return res.status(400).json({message:"Invalid credentials"})
         }
 
         const isMatch = await captain.comparePassword(password);
         if(!isMatch){
-            return res.status(400).json({messaage:"Invalid credentials"})
+            return res.status(400).json({message:"Invalid credentials"})
         }
 
         const token = captain.generateAuthToken();
