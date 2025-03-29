@@ -70,3 +70,12 @@ export const loginCaptain = async (req, res)=>{
         res.status(500).json({message: "Internal server error"})
     }
 }
+
+export const getCaptainProfile = async(req, res, next) =>{
+    res.status(200).json({captain: req.captain})
+}
+
+export const logoutCaptain = async (req, res, next) =>{
+    res.clearCookie("token")
+    res.status(200).json({message: "logged out successfully"})
+}
