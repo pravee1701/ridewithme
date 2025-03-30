@@ -11,7 +11,7 @@ const Navbar = () => {
     <div className='bg-black w-full fixed top-0 left-0 h-[4em] border-b border-gray-800 flex items-center justify-between px-6 z-50 text-white'>
       <div className="flex items-center gap-10">
         {/* Logo */}
-        <h1 className="text-2xl font-bold">Uber</h1>
+        <h1 className="text-2xl font-bold">ridewithme</h1>
         
         {/* Main Navigation */}
         <NavigationMenu className="hidden md:flex">

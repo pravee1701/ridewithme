@@ -40,7 +40,7 @@ const HeroMap = () => {
     <div className='flex flex-col items-start justify-start w-[50%]'>
     <h1 className='text-6xl text-start font-bold '>
     Go anywhere with  <span className='block ' >
-      Uber
+      ridewithme
       </span> 
     </h1>
     <div className='flex flex-col items-center justify-center space-y-1'>
