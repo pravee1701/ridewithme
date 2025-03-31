@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { Mail, Lock, Eye, EyeOff, User, Car, Truck, Bike } from "lucide-react"
 import axios from "axios"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { NavLink, useNavigate } from "react-router-dom"
+import { CaptainDataContext } from "../context/CaptainContext"
 import { toast } from "sonner"
 
 const captainFormSchema = z.object({
@@ -46,6 +47,8 @@ const captainFormSchema = z.object({
 export function CaptainRegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { setCaptain } = useContext(CaptainDataContext) 
+
   const navigate = useNavigate()
 
   const form = useForm({
@@ -88,7 +91,10 @@ export function CaptainRegisterForm() {
       console.log("Response from backend:", response.data);
   
       const Resdata = response.data;
-  
+      setCaptain({
+        isLoggedIn: true,
+        ...Resdata.captain, 
+      });
       // Store token in localStorage
       localStorage.setItem("token", Resdata.token);
   
