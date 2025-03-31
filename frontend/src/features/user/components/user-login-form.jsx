@@ -1,15 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
-
+import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { Checkbox } from "@/components/ui/checkbox"
+import { UserDataContext } from "../context/UserContext"
+import { toast } from "sonner"
+
 
 const loginFormSchema = z.object({
   email: z.string().email({
@@ -21,11 +24,11 @@ const loginFormSchema = z.object({
   rememberMe: z.boolean().default(false).optional(),
 })
 
-
-
 export function UserLoginForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { setUser } = useContext(UserDataContext) // Access setUser from UserContext
+  const navigate = useNavigate()
 
   const form = useForm({
     resolver: zodResolver(loginFormSchema),
@@ -36,14 +39,35 @@ export function UserLoginForm() {
     },
   })
 
-  function onSubmit(data) {
-    setIsLoading(true)
-    // Simulate API call
-    console.log(data)
-    setTimeout(() => {
+  async function onSubmit(data) {
+    try {
+      setIsLoading(true)
+      const response = await axios.post(`http://localhost:8080/api/v1/users/login`, {
+        email: data.email,
+        password: data.password,
+      })
+      const Resdata = response.data
+      console.log(Resdata)
+
+      // Set user data in context
+      setUser({
+        isLoggedIn: true,
+        ...Resdata.user, // Spread user data from API response
+      })
+
+      // Store token in localStorage
+      localStorage.setItem("token", Resdata.token)
+
+      // Show success message and redirect
+      toast.success("Successfully Logged In") // Use Toaster for success
+      navigate("/")
+    } catch (error) {
+      console.error(error)
+
+      toast.error("Invalid email or password") // Use Toaster for error
+    } finally {
       setIsLoading(false)
-      // Handle success - redirect or show success message
-    }, 1500)
+    }
   }
 
   return (
@@ -82,7 +106,6 @@ export function UserLoginForm() {
                 <FormItem>
                   <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
-                  
                   </div>
                   <FormControl>
                     <div className="relative">
