@@ -62,7 +62,7 @@ async  function onSubmit(data) {
     const response = await axios.post(`http://localhost:5001/api/v1/users/register` , formattedUser)
     console.log(response.data);
     const Resdata = response.data;
-    setUser(Resdata.user)
+    setUser({isLoggedIn:true,...Resdata.user})
     localStorage.setItem("token" , Resdata.token)
     toast("Successfully User Registered")
     form.reset()

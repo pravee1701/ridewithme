@@ -60,7 +60,7 @@ const Navbar = () => {
         <Button variant="ghost" className="text-white hover:text-gray-600 font-medium">
           Help
         </Button>
-        {user ? (
+        {user && user.isLoggedIn ? (
           <Button variant="ghost" className="text-white hover:text-gray-600 font-medium">
             Profile
           </Button>
