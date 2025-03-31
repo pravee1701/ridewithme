@@ -1,18 +1,17 @@
-
-import { CardFooter } from "@/components/ui/card"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { Mail, Lock, Eye, EyeOff, Car } from "lucide-react"
-
+import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { NavLink } from "react-router-dom"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { NavLink, useNavigate } from "react-router-dom"
 import { Checkbox } from "@/components/ui/checkbox"
-
+import { toast } from "sonner" 
+import { CaptainDataContext } from "../context/CaptainContext"
 const loginFormSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
@@ -23,11 +22,12 @@ const loginFormSchema = z.object({
   rememberMe: z.boolean().default(false).optional(),
 })
 
-
-
 export function CaptainLoginForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const { setCaptain } = useContext(CaptainDataContext) 
+
+  const navigate = useNavigate()
 
   const form = useForm({
     resolver: zodResolver(loginFormSchema),
@@ -38,14 +38,31 @@ export function CaptainLoginForm() {
     },
   })
 
-  function onSubmit(data) {
-    setIsLoading(true)
-    // Simulate API call
-    console.log(data)
-    setTimeout(() => {
+  async function onSubmit(data) {
+    try {
+      setIsLoading(true)
+      const response = await axios.post(`http://localhost:8080/api/v1/captain/login`, {
+        email: data.email,
+        password: data.password,
+      })
+      const Resdata = response.data
+
+      setCaptain({
+        isLoggedIn: true,
+        ...Resdata.captain, 
+      })
+      // Store token in localStorage
+      localStorage.setItem("token", Resdata.token)
+
+      // Show success message and redirect
+      toast.success("Successfully Logged In") // Use toast for success
+      navigate("/") // Redirect to  dashboard
+    } catch (error) {
+      console.error(error)
+      toast.error("Invalid email or password") // Use toast for error
+    } finally {
       setIsLoading(false)
-      // Handle success - redirect or show success message
-    }, 1500)
+    }
   }
 
   return (
@@ -69,7 +86,7 @@ export function CaptainLoginForm() {
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input placeholder="john.doe@example.com" type="email" className="pl-10" {...field} />
+                      <Input placeholder="captain@example.com" type="email" className="pl-10" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -84,7 +101,6 @@ export function CaptainLoginForm() {
                 <FormItem>
                   <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
-                 
                   </div>
                   <FormControl>
                     <div className="relative">
@@ -142,9 +158,9 @@ export function CaptainLoginForm() {
             <span className="bg-background px-2 text-muted-foreground">Don't have an account?</span>
           </div>
         </div>
-        {/* <Button variant="outline" className="w-full" asChild>
+        <Button variant="outline" className="w-full" asChild>
           <NavLink to="/captain-register">Create Captain Account</NavLink>
-        </Button> */}
+        </Button>
       </CardFooter>
     </Card>
   )

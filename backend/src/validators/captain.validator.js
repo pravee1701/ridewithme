@@ -7,7 +7,7 @@ export const registerValidator = [
     body("vehicles.color").isLength({ min: 3 }).withMessage("Color must be 3 character long"),
     body("vehicles.plate").isLength({ min: 3 }).withMessage("PLate must be 3 character long"),
     body("vehicles.capacity").isInt({ min: 1 }).withMessage("Capacity must be atleast 1"),
-    body("vehicles.vehicleType").isIn(['car', 'motorcycle', 'auto']).withMessage("Invalid vehicles type"),
+    body("vehicles.vehicleType").isIn(['car', 'bike', 'auto']).withMessage("Invalid vehicles type"),
 ]
 
 export const loginValidator = [

@@ -54,7 +54,7 @@ const captainSchema = new Schema({
         vehicleType:{
             type:String,
             required: true,
-            enum:["car", "motorcycle", "auto"]
+            enum:["car", "bike", "auto"]
         },
     },
     location:{

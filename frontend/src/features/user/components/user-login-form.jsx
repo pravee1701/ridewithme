@@ -47,7 +47,6 @@ export function UserLoginForm() {
         password: data.password,
       })
       const Resdata = response.data
-      console.log(Resdata)
 
       // Set user data in context
       setUser({

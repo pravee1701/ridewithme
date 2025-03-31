@@ -1,18 +1,18 @@
-
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { useState } from "react"
 import { Mail, Lock, Eye, EyeOff, User, Car, Truck, Bike } from "lucide-react"
-
+import axios from "axios"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+
 const captainFormSchema = z.object({
   firstName: z.string().min(2, {
     message: "First name must be at least 2 characters.",
@@ -43,11 +43,10 @@ const captainFormSchema = z.object({
   }),
 })
 
-
-
 export function CaptainRegisterForm() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   const form = useForm({
     resolver: zodResolver(captainFormSchema),
@@ -63,14 +62,52 @@ export function CaptainRegisterForm() {
     },
   })
 
-  function onSubmit(data) {
-    setIsLoading(true)
-    // Simulate API call
-    console.log(data)
-    setTimeout(() => {
-      setIsLoading(false)
-      // Handle success - redirect or show success message
-    }, 1500)
+  async function onSubmit(data) {
+    try {
+      console.log("Form data:", data);
+      setIsLoading(true);
+  
+      const formattedCaptain = {
+        fullname: {
+          firstname: data.firstName,
+          lastname: data.lastName,
+        },
+        email: data.email,
+        password: data.password,
+        vehicles: {
+          vehicleType: data.vehicleType, // Ensure this matches backend expectations
+          color: data.vehicleColor,
+          plate: data.vehiclePlate,
+          capacity: parseInt(data.vehicleCapacity, 10) || 1, // Ensure capacity is a number
+        },
+      };
+  
+      console.log("Payload sent to backend:", formattedCaptain);
+  
+      const response = await axios.post(`http://localhost:8080/api/v1/captain/register`, formattedCaptain);
+      console.log("Response from backend:", response.data);
+  
+      const Resdata = response.data;
+  
+      // Store token in localStorage
+      localStorage.setItem("token", Resdata.token);
+  
+      // Show success message and redirect
+      toast.success("Successfully Registered as Captain");
+      form.reset();
+      navigate("/"); // Redirect to dashboard
+    } catch (error) {
+      console.error("Error during registration:", error);
+  
+      // Show backend error message if available
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message || "Something went wrong during registration");
+      } else {
+        toast.error("Something went wrong during registration");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -133,7 +170,7 @@ export function CaptainRegisterForm() {
                     <FormControl>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input placeholder="john.doe@example.com" type="email" className="pl-10" {...field} />
+                        <Input placeholder="captain@example.com" type="email" className="pl-10" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -168,9 +205,6 @@ export function CaptainRegisterForm() {
                         </Button>
                       </div>
                     </FormControl>
-                    <FormDescription>
-                      Must be at least 8 characters with uppercase, lowercase, and number.
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
