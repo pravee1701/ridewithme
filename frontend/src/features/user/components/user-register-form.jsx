@@ -59,7 +59,7 @@ async  function onSubmit(data) {
       email:data.email,
       password:data.password
     }
-    const response = await axios.post(`http://localhost:5001/api/v1/users/register` , formattedUser)
+    const response = await axios.post(`http://localhost:8080/api/v1/users/register` , formattedUser)
     console.log(response.data);
     const Resdata = response.data;
     setUser({isLoggedIn:true,...Resdata.user})
