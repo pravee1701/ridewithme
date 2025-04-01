@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { getAddressCoordinates, getAutoCompleteSuggestionservice, getDistanceAndTime } from "../services/map.services";
+import { getAddressCoordinates, getAutoCompleteSuggestionservice, getDistanceAndTime } from "../services/map.services.js";
 
 
 export const getCoordinates = async (req, res) => {

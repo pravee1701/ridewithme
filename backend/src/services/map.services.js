@@ -3,7 +3,7 @@ import captainModel from "../models/captain.model.js";
 const ORS_API_KEY = process.env.ORS_API_KEY; // Get API key from OpenRouteService
 
 // Function to get latitude and longitude from an address using OpenStreetMap (Nominatim)
-export const getAddressCoordinate = async (address) => {
+export const getAddressCoordinates = async (address) => {
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
 
     try {

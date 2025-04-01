@@ -1,6 +1,5 @@
 import rideModel from "../models/ride.model.js";
-import { getAddressCoordinate, getAutoCompleteSuggestionservice,getCaptainInTheRadius,getDistanceAndTime } from "./map.services.js";
-import bcypt from "bcrypt";
+import {getDistanceAndTime } from "./map.services.js";
 import crypto from "crypto";
 
 
@@ -37,6 +36,7 @@ export const getFareService = async (pickup, destination) => {
         car: Math.round(baseFare.car + (distance_km * perKmRate.car) + (duration_min * perMinuteRate.car)),
         moto: Math.round(baseFare.moto + (distance_km * perKmRate.moto) + (duration_min * perMinuteRate.moto))
     };
+    return fare;
 }
 
 const getOtp =  (num)=>{

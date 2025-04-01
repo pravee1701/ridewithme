@@ -1,7 +1,7 @@
 import { validationResult } from "express-validator";
-import { getAddressCoordinates, getAutoCompleteSuggestionservice, getCaptainInTheRadius, getDistanceAndTime } from "../services/map.services.js";
+import { getAddressCoordinates } from "../services/map.services.js";
 import rideModel from "../models/ride.model.js";
-import { confirmRideService, endRideService, getFareService, startRideService } from "../services/rides.services.js";
+import { confirmRideService, createRideService, endRideService, getFareService, startRideService } from "../services/rides.services.js";
 import { sendMessageToSocketId } from "../socket.js";
 
 
@@ -17,15 +17,14 @@ export const createRide = async (req, res) => {
         if (!ride) {
             return res.status(400).json({ message: "Ride not created" });
         }
-        res.status(201).json({ ride });
-
+        
         const pickupCoordinates = await getAddressCoordinates(pickup);
         const captainsInRadius = await getCaptainInTheRadius(pickupCoordinates.lat, pickupCoordinates.lng, 2);
-
+        
         ride.otp = "";
-
+        
         const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate("user")
-
+        
         captainsInRadius.map(captain => {
             sendMessageToSocketId(captain.socketId, {
                 event: "newRide",
@@ -33,7 +32,8 @@ export const createRide = async (req, res) => {
                 message: "New ride request",
             })
         })
-
+        
+        res.status(201).json({ ride });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: "Ride not created" });
