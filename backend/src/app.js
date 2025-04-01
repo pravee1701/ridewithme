@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.config.js";
 import userRoutes from "./routes/user.routes.js";
 import captainRoutes from "./routes/captain.routes.js";
 import mapsRoutes from "./routes/maps.routes.js";
+import rideRoutes from "./routes/rides.routes.js";
 
 const app = express();
 dotenv.config();
@@ -27,5 +28,6 @@ app.get("/", (req, res) => {
 app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/captain", captainRoutes)
 app.use("/api/v1/maps", mapsRoutes)
+app.use("/api/v1/rides", rideRoutes)
 
 export default app;
