@@ -7,8 +7,8 @@ export const createRideValidator  = [
 ]
 
 export const getFareValidator = [
-    body("pickup").isString().isLength({ min: 3 }).withMessage("Invalid pickup address"),
-    body("destination").isString().isLength({ min: 3 }).withMessage("Invalid destination address")
+    query("pickup").isString().isLength({ min: 3 }).withMessage("Invalid pickup address"),
+    query("destination").isString().isLength({ min: 3 }).withMessage("Invalid destination address")
 ]
 
 export const confirmRideValidator = [
@@ -21,5 +21,5 @@ export const startRideValidator = [
 ]
 
 export const endRideValidator = [
-    body("rideId").isMongoId().withMessage("Invalid ride id"),
+    query("rideId").isMongoId().withMessage("Invalid ride id"),
 ]

@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { getAddressCoordinates } from "../services/map.services.js";
+import { getAddressCoordinates, getCaptainInTheRadius } from "../services/map.services.js";
 import rideModel from "../models/ride.model.js";
 import { confirmRideService, createRideService, endRideService, getFareService, startRideService } from "../services/rides.services.js";
 import { sendMessageToSocketId } from "../socket.js";
@@ -11,9 +11,9 @@ export const createRide = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-    const { userid, pickup, destination, vehicleType } = req.body;
+    const { pickup, destination, vehicleType } = req.body;
     try {
-        const ride = await createRideService({ user: userid, pickup, destination, vehicleType });
+        const ride = await createRideService({ user: req.user._id, pickup, destination, vehicleType });
         if (!ride) {
             return res.status(400).json({ message: "Ride not created" });
         }
@@ -22,9 +22,7 @@ export const createRide = async (req, res) => {
         const captainsInRadius = await getCaptainInTheRadius(pickupCoordinates.lat, pickupCoordinates.lng, 2);
         
         ride.otp = "";
-        
         const rideWithUser = await rideModel.findOne({ _id: ride._id }).populate("user")
-        
         captainsInRadius.map(captain => {
             sendMessageToSocketId(captain.socketId, {
                 event: "newRide",
@@ -64,6 +62,12 @@ export const confirmRide = async (req, res) => {
     }
 
     const { rideId } = req.body;
+    if (!rideId) {
+        return res.status(400).json({ message: "Ride id is required" });
+    }
+    if(!req.captain) {
+        return res.status(400).json({ message: "Captain id is required" });
+    }
     try {
         const ride = await confirmRideService({rideId, captain: req.captain});
 
@@ -86,7 +90,7 @@ export const startRide = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { rideId, otp } = req.body;
+    const { rideId, otp } = req.query;
 
     try {
         const ride = await startRideService({rideId, otp, captain: req.captain});
@@ -110,7 +114,7 @@ export const endRide = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { rideId } = req.body;
+    const { rideId } = req.query;
 
     try {
         const ride = await endRideService({rideId, captain: req.captain});

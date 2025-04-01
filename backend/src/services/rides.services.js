@@ -1,3 +1,4 @@
+import captainModel from "../models/captain.model.js";
 import rideModel from "../models/ride.model.js";
 import {getDistanceAndTime } from "./map.services.js";
 import crypto from "crypto";
@@ -34,7 +35,7 @@ export const getFareService = async (pickup, destination) => {
     const fare = {
         auto: Math.round(baseFare.auto + (distance_km * perKmRate.auto) + (duration_min * perMinuteRate.auto)),
         car: Math.round(baseFare.car + (distance_km * perKmRate.car) + (duration_min * perMinuteRate.car)),
-        moto: Math.round(baseFare.moto + (distance_km * perKmRate.moto) + (duration_min * perMinuteRate.moto))
+        bike: Math.round(baseFare.bike + (distance_km * perKmRate.bike) + (duration_min * perMinuteRate.bike))
     };
     return fare;
 }
@@ -49,7 +50,6 @@ const getOtp =  (num)=>{
 
 export const createRideService = async ({user, pickup, destination, vehicleType}) => {
     const fare = await getFareService(pickup, destination);
-
     const ride = await rideModel.create({
         user,
         pickup,
@@ -99,6 +99,11 @@ export const startRideService = async ({rideId, otp, captain}) => {
     },{
         status:"ongoing"
     });
+    await captainModel.findOneAndUpdate({
+        _id:captain._id
+    },{
+        status:"active"
+    });
 
     return ride
 }
@@ -119,5 +124,11 @@ export const endRideService = async ({rideId, captain}) => {
     },{
         status:"completed"
     });
+    await captainModel.findOneAndUpdate({
+        _id:captain._id
+    },{
+        status:"inactive"
+    });
+    ride.otp = "";
     return ride;
 }
