@@ -1,52 +1,53 @@
-import socketIO from "socket.io";
+import { Server as SocketIOServer } from "socket.io";
 import userModel from "./models/user.model.js";
 import captainModel from "./models/captain.model.js";
 
-
 let io;
+
 function initializeSocket(server) {
-    io = socketIO(server,{
+    io = new SocketIOServer(server, {
         cors: {
-            origin:"*",
-            methods:["GET" , "POST"]
-        }
+            origin: "*",
+            methods: ["GET", "POST"],
+        },
     });
 
-    io.on("connection" , (socket)=>{
-        socket.on("join",async(data)=>{
-            const {userId , userType} = data;
+    io.on("connection", (socket) => {
+        console.log("New client connected:", socket.id);
 
-            if(userType === "user"){
-                await userModel.findByIdAndUpdate(userId,{socketId:socket.id});
-            }
-            else if (userType === "captain") {
-                await captainModel.findByIdAndUpdate(userId,{socketId:socket.id});
+        socket.on("join", async (data) => {
+            const { userId, userType } = data;
+
+            if (userType === "user") {
+                await userModel.findByIdAndUpdate(userId, { socketId: socket.id });
+            } else if (userType === "captain") {
+                await captainModel.findByIdAndUpdate(userId, { socketId: socket.id });
             }
         });
 
-        socket.on("update-location-captain" , async (data)=>{
-            const {userId , location} = data;
+        socket.on("update-location-captain", async (data) => {
+            const { userId, location } = data;
 
-            await captainModel.findByIdAndUpdate(userId , {location:{
-                ltd:location.ltd,
-                lng:location.lng
-            }});
+            await captainModel.findByIdAndUpdate(userId, {
+                location: {
+                    ltd: location.ltd,
+                    lng: location.lng,
+                },
+            });
         });
 
-        socket.on("disconnect" , ()=>{
-            console.log("user disconnected");
-        })
-    })
+        socket.on("disconnect", () => {
+            console.log("User disconnected:", socket.id);
+        });
+    });
 }
 
-
-const sendMessageToSocketId = (socketId , messageObject)=>{
-    if(io){
-        io.to(socketId).emit(messageObject.event , messageObject.data);
+const sendMessageToSocketId = (socketId, messageObject) => {
+    if (io) {
+        io.to(socketId).emit(messageObject.event, messageObject.data);
+    } else {
+        console.log("Socket not initialized");
     }
-    else{
-        console.log("socket not initialized");
-    }
-}
+};
 
-export {initializeSocket , sendMessageToSocketId};
+export { initializeSocket, sendMessageToSocketId };
