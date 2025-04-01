@@ -49,7 +49,6 @@ export const getAutoCompleteSuggestions = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
         const { input } = req.query;
-
         const suggestions = await getAutoCompleteSuggestionservice(input);
         if (!suggestions) {
             return res.status(400).json({ message: "Suggestions not found" });

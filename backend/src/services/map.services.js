@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
 import axios from "axios";
 import captainModel from "../models/captain.model.js";
-const ORS_API_KEY = process.env.ORS_API_KEY; // Get API key from OpenRouteService
+const ORS_API_KEY = process.env.ORS_API_KEY;
 
 // Function to get latitude and longitude from an address using OpenStreetMap (Nominatim)
 export const getAddressCoordinates = async (address) => {
@@ -30,39 +32,41 @@ export const getAddressCoordinates = async (address) => {
 export const getDistanceAndTime = async (originName, destinationName) => {
     try {
         // Fetch coordinates for origin and destination
-        const origin = await getAddressCoordinate(originName);
-        const destination = await getAddressCoordinate(destinationName);
+        const origin = await getAddressCoordinates(originName);
+        const destination = await getAddressCoordinates(destinationName);
 
         const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${origin.lng},${origin.lat}&end=${destination.lng},${destination.lat}`;
 
+        // Make the API request
         const response = await axios.get(url);
 
-        if (response.data.routes.length > 0) {
-            const route = response.data.routes[0];
+        // Check if the response contains the required data
+        if (response.data.features && response.data.features.length > 0) {
+            const route = response.data.features[0].properties.segments[0]; 
+            const summary = response.data.features[0].properties.summary; 
             return {
                 origin: originName,
                 destination: destinationName,
-                distance_km: route.summary.distance / 1000, // Convert meters to km
-                duration_min: route.summary.duration / 60, // Convert seconds to minutes
+                distance_km: summary.distance / 1000, // Convert meters to kilometers
+                duration_min: summary.duration / 60, // Convert seconds to minutes
                 origin_coords: origin,
-                destination_coords: destination
+                destination_coords: destination,
             };
         } else {
-            throw new Error("Failed to fetch distance and time");
+            throw new Error("Failed to fetch distance and time: No route found");
         }
     } catch (error) {
-        console.error(error);
+        console.error("Error in getDistanceAndTime:", error);
         throw error;
     }
 };
 
 // Function to get autocomplete suggestions for addresses
-export const getAutoCompleteSuggestionservice = async (req, res) => {
+export const getAutoCompleteSuggestionservice = async (query) => {
     try {
-        const { query } = req.query; 
 
         if (!query) {
-            return res.status(400).json({ error: "Query parameter is required" });
+            throw new Error("Query parameter is required");
         }
 
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5`;
@@ -77,14 +81,13 @@ export const getAutoCompleteSuggestionservice = async (req, res) => {
                 lat: parseFloat(place.lat),
                 lng: parseFloat(place.lon),
             }));
-
-            return res.json({ suggestions });
+            return suggestions;
         } else {
-            return res.status(404).json({ message: "No suggestions found" });
+            throw new Error("No suggestions found");
         }
     } catch (error) {
         console.error("Autocomplete error:", error);
-        return res.status(500).json({ error: "Internal server error" });
+        throw error;
     }
 };
 
